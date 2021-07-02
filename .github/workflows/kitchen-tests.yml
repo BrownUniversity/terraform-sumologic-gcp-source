@@ -1,0 +1,15 @@
+name: kitchen-tests
+
+on: [push, workflow_dispatch]
+
+jobs:
+  all:
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    container: brownccv/kitchen-terraform:latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Run Kitchen
+      run: kitchen test
+
