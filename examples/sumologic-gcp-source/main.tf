@@ -3,23 +3,29 @@
 # These resources are directly tested.
 # ----------------------------------------------------------------------------
 
-resource "random_id" "res" {
-  byte_length = 2
+locals {
+  name       = "inspec-sumologic-gcp-source"
 }
 
-module "simple-project" {
-  source = "../../"
+# ------------------------------------------------------------
+#   MAIN BLOCK
+# ------------------------------------------------------------
 
-  project_name    = local.project_name
-  billing_account = var.billing_account
-  folder_id       = var.folder_id
+resource "random_string" "resource" {
+  length  = 4
+  special = false
+  upper   = false
 }
 
-module "gcp_sumologic_source" {
-  source = "../"
-  name = "Inspec Test ${random_id.res.hex}"
+module "sumologic_gcp_source" {
+    source = "../../modules/sumologic-gcp-source"
+    source_name = local.name
+    collector_id = var.collector_id
+    source_description = "Test GCP Source"
+    category = "test"
+    parent_categories = ["inspec", "automated"]
 }
 
-output "random" {
-  value = random_id.res.hex
-}
+variable "sumologic_access_id" {}
+variable "sumologic_access_key" {}
+variable "collector_id" {}

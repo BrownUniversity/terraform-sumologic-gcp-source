@@ -6,5 +6,9 @@ terraform {
       source  = "sumologic/sumologic"
       version = ">= 2.9, < 3.0" # set the Sumo Logic Terraform Provider version
     }
+    google = {
+      source = "hashicorp/google"
+      version = "3.74"
+    }
   }
 }

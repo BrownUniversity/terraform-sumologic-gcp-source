@@ -1,15 +1,47 @@
 name: kitchen-tests
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
-  all:
-    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+  docker:
     runs-on: ubuntu-latest
-    container: brownccv/kitchen-terraform:latest
+    permissions:
+      packages: write
+      contents: read
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Run Kitchen
-      run: kitchen test
+      - uses: actions/checkout@v2
 
+      - uses: dorny/paths-filter@v2.2.0
+        id: filter
+        with:
+          base: ${{ github.ref }}
+          filters: |
+            all:
+              - '.github/workflows/kitchen-tests.yml'
+              - 'Dockerfile'
+              - 'Gemfile*'
+      - name: Build Image
+        if: steps.filter.outputs.all == 'true' && !contains(github.event.commits[0].message, '[skip docker]')
+        run: docker build . --file Dockerfile --tag "${{ github.event.repository.name }}" --label "runnumber=${GITHUB_RUN_ID}"
+
+      - name: Log into registry
+        if: steps.filter.outputs.all == 'true' && !contains(github.event.commits[0].message, '[skip docker]')
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push image to gh packages
+        id: upload
+        if: steps.filter.outputs.all == 'true' && !contains(github.event.commits[0].message, '[skip docker]')
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          VERSION=latest
+          echo VERSION=$VERSION
+          echo IMAGE_ID=$IMAGE_ID
+          docker tag ${{ github.event.repository.name }} $IMAGE_ID:${VERSION}
+          docker push $IMAGE_ID:$VERSION
