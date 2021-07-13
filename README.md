@@ -1,15 +1,14 @@
-# terraform-kitchen-template
-A template repository for terraform projects with kitchen terraform tests, pre-commit hooks, and GitHub actions for CI, PR labeler and Relase Drafter. See [Development](#development) section for details.
+# terraform-sumologic-gcp-soruce
 
+This repo contains terraform code to help you route log messages from a GCP project to a sumologic GCP collector. The parent module creates both a GCP source on a pre-existing collector in sumologic and a topic, pubsub log router, and pubsub push subscription in GCP.
 
 <!-- update badge link below for your repo! -->
 ![kitchen-tests](https://github.com/BrownUniversity/terraform-kitchen-template/workflows/kitchen-tests/badge.svg)
 
-
 # Contents:
 
 - [Getting Started](#getting-started)
-- [How to use this module](#how-to-use-this-module)
+- [Basic Implementation](#basic-implementation)
 - [Requirements](#requirements)
 - [Providers](#providers)
 - [Inputs](#inputs)
@@ -19,40 +18,26 @@ A template repository for terraform projects with kitchen terraform tests, pre-c
 
 ## Getting Started
 
-This repository serves as a template for [Terraform modules](https://www.terraform.io/docs/modules/usage.html), that are tested using [Kitchen-terraform](https://github.com/newcontext-oss/kitchen-terraform). To get started, you should use this template to create a new repository. See [instructions](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template) to get started with templates.
+Both an existing sumologic hosted collector and GCP project must exist prior to execution, this module does not create those objects. `modules/sumologic-gcp-source` can be used by itself as a basis for other logging functionality.
 
-This template implements the following:
+In GCP, you will also need to disable domain-restricted sharing for your project directly or by inheritence, as this module needs to add `roles/pubsub.publisher` to a Google-owned service account.
 
-* Example module to print a message with requiered files `main.tf`, `variables.tf`, `outputs.tf`
-* Ruby `Gemfile` and `.ruby-version` file to specify version of Ruby and ruby packages
-* Kitchen terraform configuration file `.kitchen.yml` with one example suite and a local backend
-* One simple example in the [examples](/examples) folder
-* Integration test for the example in [test/integration](/test/integration) folder. 
-* An example of implementing a custom Inspec resource to execute a local command and capture the `stdout`. See [test/integration/simple-template/libraries](/test/integration/simple-template/libraries)
-* The following pre-commit hooks for terraform. See [Development Section](#development) for further instructions on using the pre-commit hooks
+## Basic Implementation
 
-    | Hook name                                        | Description                                                                                                                |
-    | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-    | `terraform_fmt`                                  | Rewrites all Terraform configuration files to a canonical format.                                                          |
-    | `terraform_docs`                                 | Inserts input and output documentation into `README.md`.                                                       |
-    | `terraform_tflint`                               | Validates all Terraform configuration files with [TFLint](https://github.com/terraform-linters/tflint).                              |
-    | `terraform_tfsec`                                | [TFSec](https://github.com/liamg/tfsec) static analysis of terraform templates to spot potential security issues.     |
-* GitHub Actions to label PullRequests, Draft Releases and Run the kitchen tests. See [Development Section](#development) for further instructions
-* Protections on the default branch. Commits to default branch need to be through a PR that has been reviewed and has passing tests 
+```terraform
+module "gcp-log-export" {
+  source                 = "../.."
+  project_id             = "my-project-sr2f"
+  sumologic_collector_id = "1242652142"
+  name                   = "my-gcp-log-export"
+  gcp_filters = {
+    gke     = "resource.type=\"gke_cluster\" OR resource.type=\"k8s_cluster\" OR resource.type=\"k8s_node\" OR resource.type=\"k8s_pod\"",
+    project = "resource.type=\"project\""
+  }
+}
+```
 
-## How to use this module
-
-After starting a new repository from this template, you should get familiar with the hooks an actions. A recommended way to do so, could be as follows:
-
-* Create a new feature branch `git checkout -b chore/change-variable-defaults`
-* Change the default message (in `variables.tf`) that gets printed by the module in this repository
-* Run the pre-commit hooks `pre-commit run -a`. The `docs` hook will update your `README` to reflect the change to the default value of `message`.
-* Commit, push and start a Pull Request. Based on the name of your branch, the PR should be labeled as `chore`
-* Request a reviewer, make sure tests are passing, and merge. After merging, a new Draft Release will be started with notes based on the name of the PR
-
-Make sure to read the reminder on [Development](#development) section.
-
-After getting familiar with pre-commit hooks and actions, you are ready to **customize your module.**
+This will create both a sumologic GCP source as well as all the plumbing in your GCP project to export logs to sumologic. The `gcp_filters` parameter is important, as you need to set up at least one filter to be able to send any logs at all. These can be built using the Stackdriver log explorer in the GCP Cloud Console. `gcp_filters` is a map, so you can build an unlimited number of filters based on the logs you need. The example here will get you all GKE logs and project logs.
 
 <!-- The content below is automatically generated by fmt precommit hook -->
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
@@ -60,26 +45,56 @@ After getting familiar with pre-commit hooks and actions, you are ready to **cus
 
 | Name | Version |
 |------|---------|
-| terraform | ~> 0.12 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | ~> 1.0 |
+| <a name="requirement_google"></a> [google](#requirement\_google) | 3.74 |
+| <a name="requirement_sumologic"></a> [sumologic](#requirement\_sumologic) | >= 2.9, < 3.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| null | n/a |
+| <a name="provider_google"></a> [google](#provider\_google) | 3.74 |
+
+## Modules
+
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_sumologic-gcp-source"></a> [sumologic-gcp-source](#module\_sumologic-gcp-source) | ./modules/sumologic-gcp-source | n/a |
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [google_logging_project_sink.logged_messages](https://registry.terraform.io/providers/hashicorp/google/3.74/docs/resources/logging_project_sink) | resource |
+| [google_pubsub_subscription.push](https://registry.terraform.io/providers/hashicorp/google/3.74/docs/resources/pubsub_subscription) | resource |
+| [google_pubsub_topic.topic](https://registry.terraform.io/providers/hashicorp/google/3.74/docs/resources/pubsub_topic) | resource |
+| [google_pubsub_topic_iam_member.member](https://registry.terraform.io/providers/hashicorp/google/3.74/docs/resources/pubsub_topic_iam_member) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| message | Message to pass to echo | `string` | `"Hello terraform-kitchen template"` | no |
+| <a name="input_category"></a> [category](#input\_category) | Single-word category that logs for this search will go into. Will be concated with parent\_categories | `string` | `""` | no |
+| <a name="input_gcp_filters"></a> [gcp\_filters](#input\_gcp\_filters) | List of map of filters to create and be routed into the pubsub topic and push | `map(string)` | `{}` | no |
+| <a name="input_name"></a> [name](#input\_name) | Name to use uniformally for the log source, pubsub topic, and pubsub subscription | `string` | n/a | yes |
+| <a name="input_parent_categories"></a> [parent\_categories](#input\_parent\_categories) | A hierarchy of terms that make up the parent categories. Important if using search partitioning | `list(string)` | `[]` | no |
+| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | GCP Project ID where the GCP resources should be created | `string` | n/a | yes |
+| <a name="input_pubsub_sa_publisher_account"></a> [pubsub\_sa\_publisher\_account](#input\_pubsub\_sa\_publisher\_account) | GCP Service Account to assign roles/pubsub.publisher to. | `string` | `"serviceAccount:cloud-logs@system.gserviceaccount.com"` | no |
+| <a name="input_push_deadline_seconds"></a> [push\_deadline\_seconds](#input\_push\_deadline\_seconds) | Maximum amount of time for the subscription to wait for acknowledgement of reciept of message | `number` | `20` | no |
+| <a name="input_source_description"></a> [source\_description](#input\_source\_description) | Description to use for the source | `string` | `""` | no |
+| <a name="input_sumologic_collector_id"></a> [sumologic\_collector\_id](#input\_sumologic\_collector\_id) | ID of the hosted collector at sumologic that will recieve messages for the new source | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| message | Message to pass to echo |
-
+| <a name="output_google_pubsub_subscription_id"></a> [google\_pubsub\_subscription\_id](#output\_google\_pubsub\_subscription\_id) | n/a |
+| <a name="output_google_pubsub_subscription_name"></a> [google\_pubsub\_subscription\_name](#output\_google\_pubsub\_subscription\_name) | n/a |
+| <a name="output_google_pubsub_subscription_shortid"></a> [google\_pubsub\_subscription\_shortid](#output\_google\_pubsub\_subscription\_shortid) | n/a |
+| <a name="output_google_pubsub_topic_id"></a> [google\_pubsub\_topic\_id](#output\_google\_pubsub\_topic\_id) | n/a |
+| <a name="output_google_pubsub_topic_name"></a> [google\_pubsub\_topic\_name](#output\_google\_pubsub\_topic\_name) | n/a |
+| <a name="output_google_topic_iam_publisher"></a> [google\_topic\_iam\_publisher](#output\_google\_topic\_iam\_publisher) | n/a |
+| <a name="output_sumologic_endpoint"></a> [sumologic\_endpoint](#output\_sumologic\_endpoint) | n/a |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 

@@ -4,7 +4,7 @@
 # ----------------------------------------------------------------------------
 
 locals {
-  name       = "inspec-sumologic-gcp-source"
+  name = "inspec-sumologic-gcp-source"
 }
 
 # ------------------------------------------------------------
@@ -18,12 +18,12 @@ resource "random_string" "resource" {
 }
 
 module "sumologic_gcp_source" {
-    source = "../../modules/sumologic-gcp-source"
-    source_name = local.name
-    collector_id = var.collector_id
-    source_description = "Test GCP Source"
-    category = "test"
-    parent_categories = ["inspec", "automated"]
+  source             = "../../modules/sumologic-gcp-source"
+  source_name        = local.name
+  collector_id       = var.collector_id
+  source_description = "Test GCP Source"
+  category           = "test"
+  parent_categories  = ["inspec", "automated"]
 }
 
 variable "sumologic_access_id" {}

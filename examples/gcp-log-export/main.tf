@@ -31,7 +31,7 @@ module "project" {
 
 # Temporarily disable the org policy domain restricted sharing
 resource "google_project_organization_policy" "domain_restricted_sharing_disable" {
-  project = module.project.project_id
+  project    = module.project.project_id
   constraint = "iam.allowedPolicyMemberDomains"
 
   list_policy {
@@ -45,7 +45,7 @@ resource "google_project_organization_policy" "domain_restricted_sharing_disable
 }
 
 module "gcp-log-export" {
-  depends_on = [google_project_organization_policy.domain_restricted_sharing_disable]
+  depends_on             = [google_project_organization_policy.domain_restricted_sharing_disable]
   source                 = "../.."
   project_id             = module.project.project_id
   sumologic_collector_id = var.sumologic_collector_id

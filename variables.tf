@@ -7,7 +7,7 @@ variable "name" {
 
 variable "project_id" {
   description = "GCP Project ID where the GCP resources should be created"
-  type = string
+  type        = string
 }
 
 variable "sumologic_collector_id" {
@@ -18,21 +18,21 @@ variable "sumologic_collector_id" {
 # Optional Variables
 
 variable "source_description" {
-    description = "Description to use for the source"
-    type = string
-    default = ""
+  description = "Description to use for the source"
+  type        = string
+  default     = ""
 }
 
 variable "category" {
-    description = "Single-word category that logs for this search will go into. Will be concated with parent_categories"
-    type = string
-    default = ""
+  description = "Single-word category that logs for this search will go into. Will be concated with parent_categories"
+  type        = string
+  default     = ""
 }
 
 variable "parent_categories" {
-    description = "A hierarchy of terms that make up the parent categories. Important if using search partitioning"
-    type = list(string)
-    default = []
+  description = "A hierarchy of terms that make up the parent categories. Important if using search partitioning"
+  type        = list(string)
+  default     = []
 }
 
 variable "gcp_filters" {
@@ -43,13 +43,13 @@ variable "gcp_filters" {
 
 variable "push_deadline_seconds" {
   description = "Maximum amount of time for the subscription to wait for acknowledgement of reciept of message"
-  type = number
-  default = 20
+  type        = number
+  default     = 20
 }
 
 # You probably shouldn't change this, but it's here if you know a specific use case
 variable "pubsub_sa_publisher_account" {
   description = "GCP Service Account to assign roles/pubsub.publisher to."
-  type = string
-  default = "serviceAccount:cloud-logs@system.gserviceaccount.com"
+  type        = string
+  default     = "serviceAccount:cloud-logs@system.gserviceaccount.com"
 }

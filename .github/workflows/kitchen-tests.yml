@@ -45,3 +45,55 @@ jobs:
           echo IMAGE_ID=$IMAGE_ID
           docker tag ${{ github.event.repository.name }} $IMAGE_ID:${VERSION}
           docker push $IMAGE_ID:$VERSION
+sumologic-gcp-source:
+    needs: [docker]
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/brownuniversity/terraform-gcp-sumologic-modules:latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Create Credential File
+      run: |
+        echo "$GCP_CREDENTIAL_JSON" > /tmp/credentials.json
+      env:
+        GCP_CREDENTIAL_JSON: ${{ secrets.GCP_CREDENTIAL_JSON }}
+    - name: Run Kitchen
+      run: kitchen test sumologic-gcp-source
+      env:
+        TF_VAR_github_organization: BrownUniversity
+        TF_VAR_github_token: ${{ secrets.GH_token }}
+        TF_VAR_collector_id: ${{ secrets.SUMOLOGIC_COLLECTOR_ID }}
+        TF_VAR_billing_account: ${{ secrets.GCP_BILLING_ACCOUNT }}
+        TF_VAR_org_id: ${{ secrets.GCP_ORG_ID }}
+        TF_VAR_folder_id: ${{ secrets.GCP_FOLDER_ID }}
+        SUMOLOGIC_ACCESSID: ${{ secrets.SUMOLOGIC_ACCESSID }}
+        SUMOLOGIC_ACCESSKEY: ${{ secrets.SUMOLOGIC_ACCESSKEY }}
+        SUMOLOGIC_ENVIRONMENT: ${{ secrets.SUMOLOGIC_ENVIRONMENT }}
+        GOOGLE_APPLICATION_CREDENTIALS: /tmp/credentials.json
+gcp-log-export:
+    needs: [docker]
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/brownuniversity/terraform-gcp-sumologic-modules:latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Create Credential File
+      run: |
+        echo "$GCP_CREDENTIAL_JSON" > /tmp/credentials.json
+      env:
+        GCP_CREDENTIAL_JSON: ${{ secrets.GCP_CREDENTIAL_JSON }}
+    - name: Run Kitchen
+      run: kitchen test gcp-log-export
+      env:
+        TF_VAR_github_organization: BrownUniversity
+        TF_VAR_github_token: ${{ secrets.GH_token }}
+        TF_VAR_collector_id: ${{ secrets.SUMOLOGIC_COLLECTOR_ID }}
+        TF_VAR_billing_account: ${{ secrets.GCP_BILLING_ACCOUNT }}
+        TF_VAR_org_id: ${{ secrets.GCP_ORG_ID }}
+        TF_VAR_folder_id: ${{ secrets.GCP_FOLDER_ID }}
+        SUMOLOGIC_ACCESSID: ${{ secrets.SUMOLOGIC_ACCESSID }}
+        SUMOLOGIC_ACCESSKEY: ${{ secrets.SUMOLOGIC_ACCESSKEY }}
+        SUMOLOGIC_ENVIRONMENT: ${{ secrets.SUMOLOGIC_ENVIRONMENT }}
+        GOOGLE_APPLICATION_CREDENTIALS: /tmp/credentials.json
