@@ -34,6 +34,6 @@ control 'sumologic configuration' do
     its(['source', 'id']) {should eq Integer(sumologic_source_id)}
     its(['source', 'name']) {should eq sumologic_source_name}
     its(['source', 'thirdPartyRef', 'resources', 0, 'serviceType']) {should eq 'GoogleCloudLogs'}
-    its{['source', 'url']} {should eq sumologic_endpoint}
+    its(['source', 'url']) {should eq sumologic_endpoint}
   end
 end
