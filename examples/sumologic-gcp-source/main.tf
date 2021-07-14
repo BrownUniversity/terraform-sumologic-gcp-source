@@ -4,7 +4,7 @@
 # ----------------------------------------------------------------------------
 
 locals {
-  name = "inspec-sumologic-gcp-source"
+  name = "inspec-sumo-gcp-test-${random_string.resource.result}"
 }
 
 # ------------------------------------------------------------

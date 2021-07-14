@@ -7,7 +7,7 @@ sumologic_base64 = ENV["SUMOLOGIC_BASE64"]
 # Terraform outputs defined in examples/*/outputs.tf
 # become directly available to Ispec tests as attributes
 sumologic_source_id = attribute("id")
-sumologic_collector_id = attribute("collector_id")
+sumologic_collector_id = ENV["TF_VAR_sumologic_collector_id"]
 sumologic_source_name = attribute("name")
 sumologic_endpoint = attribute("url")
 sumologic_source_category = attribute("source_category")
@@ -34,5 +34,6 @@ control 'sumologic configuration' do
     its(['source', 'id']) {should eq Integer(sumologic_source_id)}
     its(['source', 'name']) {should eq sumologic_source_name}
     its(['source', 'thirdPartyRef', 'resources', 0, 'serviceType']) {should eq 'GoogleCloudLogs'}
+    its{['source', 'url']} {should eq sumologic_endpoint}
   end
 end
