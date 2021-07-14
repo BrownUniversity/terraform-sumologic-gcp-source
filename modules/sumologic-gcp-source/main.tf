@@ -8,7 +8,7 @@ resource "sumologic_gcp_source" "sgc" {
   name         = var.source_name
   description  = var.source_description
   category     = var.category != null ? "${local.parent_categories}${var.category_delimiter}${var.category}" : null
-  collector_id = var.sumologic_collector_id
+  collector_id = var.collector_id
   dynamic "filters" {
     for_each = var.filters
     content {

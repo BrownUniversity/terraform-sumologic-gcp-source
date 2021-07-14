@@ -20,12 +20,10 @@ resource "random_string" "resource" {
 module "sumologic_gcp_source" {
   source             = "../../modules/sumologic-gcp-source"
   source_name        = local.name
-  collector_id       = var.collector_id
+  collector_id       = var.sumologic_collector_id
   source_description = "Test GCP Source"
   category           = "test"
   parent_categories  = ["inspec", "automated"]
 }
 
-variable "sumologic_access_id" {}
-variable "sumologic_access_key" {}
-variable "collector_id" {}
+variable "sumologic_collector_id" {}
