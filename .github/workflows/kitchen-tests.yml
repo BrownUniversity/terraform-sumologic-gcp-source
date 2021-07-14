@@ -71,6 +71,7 @@ jobs:
         SUMOLOGIC_ACCESSID: ${{ secrets.SUMOLOGIC_ACCESSID }}
         SUMOLOGIC_ACCESSKEY: ${{ secrets.SUMOLOGIC_ACCESSKEY }}
         SUMOLOGIC_ENVIRONMENT: ${{ secrets.SUMOLOGIC_ENVIRONMENT }}
+        SUMOLOGIC_BASE64: ${{ secrets.SUMOLOGIC_BASE64 }}
         GOOGLE_APPLICATION_CREDENTIALS: /tmp/credentials.json
   gcp-log-export:
     needs: [docker]
