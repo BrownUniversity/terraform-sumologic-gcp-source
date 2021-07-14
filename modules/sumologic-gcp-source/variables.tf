@@ -7,7 +7,7 @@ variable "source_name" {
   type        = string
 }
 
-variable "sumologic_collector_id" {
+variable "collector_id" {
   description = "ID of the hosted collector that the source will be created under"
   type        = string
 }
